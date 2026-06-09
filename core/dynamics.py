@@ -20,13 +20,13 @@ def calculate_aerodynamic_drag(v: np.ndarray, rho_a: float, cd_af: float, v_w: n
     """
     return 0.5 * rho_a * cd_af * (v + v_w * np.cos(phi_veh - phi_wind))**2
 
-def calculate_rolling_resistance(v: np.ndarray, M_v: float, g: float, theta: np.ndarray) -> np.ndarray:
+def calculate_rolling_resistance(v: np.ndarray, M_v: float, g: float, theta: np.ndarray, crr: float = 0.01) -> np.ndarray:
     """
     Calculate rolling resistance force.
     F_r(s) = M_v * g * f_r(v) * cos(theta(s))
-    f_r(v) = 0.01 * (1 + 3.6 * v(s) / 100)  # localized linear relationship
+    f_r(v) = crr * (1 + 3.6 * v(s) / 100)  # localized linear relationship
     """
-    f_r = 0.01 * (1.0 + (3.6 * v) / 100.0)
+    f_r = crr * (1.0 + (3.6 * v) / 100.0)
     return M_v * g * f_r * np.cos(theta)
 
 def calculate_gradient_resistance(M_v: float, g: float, theta: np.ndarray) -> np.ndarray:

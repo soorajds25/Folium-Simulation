@@ -16,28 +16,28 @@ def calculate_motor_torque(F_trac: float, r_w: float, G: float, eta_trans: float
     """
     return (F_trac * r_w) / (G * eta_trans)
 
-def get_motor_efficiency(T_motor: float, Omega_motor: float) -> float:
+def get_motor_efficiency(T_motor: float, Omega_motor: float, eta_peak: float = 0.80) -> float:
     """
-    Analytic representation of a permanent magnet motor map.
-    Peak efficiency hits 85% at medium torque and RPM bands.
+    Analytic representation of the 1418ZXF Geared BLDC motor map.
+    Peak efficiency hits eta_peak (default 80%) near the rated speed of 450 RPM.
     """
-    T_peak = 10.0
-    RPM_peak = 2000.0
-    k1 = 0.001
-    k2 = 1e-8
+    T_peak = 8.5
+    RPM_peak = 450.0
+    k1 = 0.005
+    k2 = 5e-7
     
-    eta = 0.85 - k1 * (T_motor - T_peak)**2 - k2 * (Omega_motor - RPM_peak)**2
-    return max(0.1, min(0.85, eta))
+    eta = eta_peak - k1 * (T_motor - T_peak)**2 - k2 * (Omega_motor - RPM_peak)**2
+    return max(0.1, min(eta_peak, eta))
 
 def clamp_motor_rpm(Omega_motor: float, max_rpm: float) -> float:
     """Hard redline clamp limit on max motor RPM."""
     return min(Omega_motor, max_rpm)
 
-def calculate_electrical_power(T_motor: float, Omega_motor: float, is_propulsion: bool = True) -> float:
+def calculate_electrical_power(T_motor: float, Omega_motor: float, eta_peak: float = 0.80, is_propulsion: bool = True) -> float:
     """
     Calculate electrical power requirement from mechanical power and efficiency map.
     """
-    eta_m = get_motor_efficiency(T_motor, Omega_motor)
+    eta_m = get_motor_efficiency(T_motor, Omega_motor, eta_peak)
     mechanical_power = T_motor * Omega_motor * (2 * np.pi / 60.0)
     
     if is_propulsion:
