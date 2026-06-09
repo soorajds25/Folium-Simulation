@@ -1,0 +1,45 @@
+================================================================================
+PROJECT LEVEL INSTRUCTION DOCUMENT (MASTER REFERENCE FILE)
+================================================================================
+
+1. PROJECT PURPOSE & OVERVIEW
+The purpose of this project is to develop a "Professional Streamlit-Based Shell 
+Eco-Marathon Vehicle Strategy Simulator and Optimization Dashboard." This software 
+is strictly intended to operate as a high-fidelity motorsport strategy engineering 
+platform. Its primary objective is NOT to serve as an educational toy or simple 
+physics animator, but rather to determine a mathematically proven, globally optimal 
+driving strategy for any given race track while strictly adhering to all Shell 
+Eco-Marathon official competition rules, motor/battery boundaries, and time limits.
+
+2. CORE DEVELOPMENT PHILOSOPHY
+- Optimization-First: The platform must treat the race as a mathematical trajectory 
+  optimization problem solved in the distance-domain (s-domain). Strategy generation 
+  must be completely automated by an internal optimal control solver. Manual creation 
+  of throttle or burst profiles by the user is forbidden as a method of strategy planning.
+- Mathematical Determinism: Every output must be traceable to underlying physical 
+  laws (aerodynamic drag, tire hysteresis, motor torque envelopes, and battery internal 
+  resistances). Heuristics should only be utilized where physical validation models 
+  exist to parameterize them.
+- Modularity & Future-Proofing: The application must decouple the track data parsing, 
+  vehicle physics modeling, numerical optimization, visualization, and telemetry 
+  subsystems. The architecture must explicitly support low-latency, real-time telemetry 
+  ingestion without structural modification.
+
+3. TECHNICAL DEVELOPMENT BOUNDS & STAGES
+The final software system must execute its operational lifecycle across five stages:
+  - Stage 1: Standardized Track S-Domain Representation Ingestion (CSV/GPX/Manual).
+  - Stage 2: Vehicle Dynamics and Powertrain Parameterization (Fixed & Tunable).
+  - Stage 3: Feasible Bounds Profiling (Velocity envelope computation under cornering 
+             and current limits).
+  - Stage 4: Trajectory Optimization Engine execution (iLQR / Dynamic Programming).
+  - Stage 5: Analytical Dashboard Visualization and Driver Assistance Blueprinting.
+
+4. CORE SOFTWARE CONSTRAINTS
+- Strict compliance with Shell Eco-Marathon Rulebook parameters (e.g., maximum 60V DC 
+  system design, maximum 1000Wh Lithium-based battery capacity, and precise 14.8 km 
+  total race distance over 4 laps under a 35-minute maximum time window).
+- Absolute adherence to traction boundaries. The strategy generator must never command 
+  tractive or cornering forces that exceed physical track adhesion parameters.
+- Execution environment: The core solver logic must execute cleanly within standard 
+  numerical constraints, eliminating non-repeatable control chatter or humanly 
+  impossible burst segments.
