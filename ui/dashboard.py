@@ -243,7 +243,64 @@ def render_dashboard(
 
     with tab1:
         st.subheader("Spatial Control Strategy Vectors")
-        render_race_charts(track_nodes, optimized_states)
+
+        # ── Lap Selector ──────────────────────────────────────────────────
+        # Infer single-lap distance from the total 4-lap race distance
+        total_dist_m = track_nodes[-1].distance_m if track_nodes else 0.0
+        n_laps = 4
+        single_lap_dist_m = total_dist_m / n_laps if n_laps > 0 else total_dist_m
+        single_lap_km = single_lap_dist_m / 1000.0
+
+        view_options = ["Full Race (All Laps)"]
+        for lap_i in range(1, n_laps + 1):
+            start_km = (lap_i - 1) * single_lap_km
+            end_km   = lap_i * single_lap_km
+            view_options.append(f"Lap {lap_i}  ({start_km:.2f} – {end_km:.2f} km)")
+
+        selected_view = st.radio(
+            "🔍 Select View Range",
+            options=view_options,
+            index=0,
+            horizontal=True,
+            key="lap_selector"
+        )
+
+        # ── Slice data arrays based on selection ──────────────────────────
+        if selected_view.startswith("Full Race"):
+            view_nodes  = track_nodes
+            view_states = optimized_states
+        else:
+            # Parse lap index from the selected label
+            lap_number = int(selected_view.split("Lap")[1].split()[0])
+            s_start = (lap_number - 1) * single_lap_dist_m
+            s_end   = lap_number * single_lap_dist_m
+
+            # Filter track nodes by distance range (safe bounds)
+            view_nodes = [
+                n for n in track_nodes
+                if s_start <= n.distance_m <= s_end
+            ]
+            # Filter optimizer states by distance range (safe bounds)
+            view_states = [
+                st_ for st_ in optimized_states
+                if s_start <= st_.position_s <= s_end
+            ]
+
+            # Defensive: ensure we have at least 2 data points for plotting
+            if len(view_nodes) < 2:
+                view_nodes = track_nodes
+            if len(view_states) < 2:
+                view_states = optimized_states
+                st.warning("⚠️ Lap filter yielded insufficient data points — falling back to full race view.")
+
+        st.caption(
+            f"Displaying **{len(view_states):,}** state nodes  ·  "
+            f"**{len(view_nodes):,}** track nodes  ·  "
+            f"Range: {view_nodes[0].distance_m / 1000.0:.3f} – "
+            f"{view_nodes[-1].distance_m / 1000.0:.3f} km"
+        )
+
+        render_race_charts(view_nodes, view_states)
 
     with tab2:
         st.subheader("Track Geometric Properties")
